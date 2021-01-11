@@ -3,7 +3,6 @@
   "description": "离线守护脚本",
   "type": "library",
   "homepage": "https://github.com/houxiansheng/script-monitor",
-//  "license": "Private Protocol",
   "authors": [
     {
       "name": "hxb",
