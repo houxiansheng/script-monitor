@@ -1,0 +1,19 @@
+{
+  "name": "wolfans/script-monitor",
+  "description": "离线守护脚本",
+  "type": "library",
+  "homepage": "https://github.com/houxiansheng/script-monitor",
+  "license": "Private Protocol",
+  "authors": [
+    {
+      "name": "hxb",
+      "email": "1023188018@qq.com"
+    }
+  ],
+  "require": {},
+  "autoload": {
+    "psr-4": {
+      "Wolfans\\": "src/"
+    }
+  }
+}
