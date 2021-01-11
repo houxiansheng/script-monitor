@@ -4,10 +4,10 @@
  */
 namespace WolfansSm\Library\Schedule;
 
-use WolfansSm\Library\Command\Table;
+use WolfansSm\Library\Share\Table;
 
 class Register {
-    protected $command = [];
+    protected static $command = [];
 
     public static function setCommand(Command $command) {
         $taskId = $command->getTaskId();
@@ -24,10 +24,9 @@ class Register {
                 $schedule->setOptions($key, $val);
             }
             //配置任务
-            foreach ($command->getScheduleList($routeId) as $classList) {
-                foreach ($classList as $class) {
-                    $schedule->setTask($class);
-                }
+            //配置任务
+            foreach ($command->getScheduleList($routeId) as $class) {
+                $schedule->setTask($class);
             }
             self::$command[$taskId][$routeId] = $schedule;
         }

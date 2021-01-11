@@ -1,6 +1,8 @@
 <?php
 namespace WolfansSm\Library\Command;
 
+use WolfansSm\Library\Share\Table;
+
 class Fork {
 
     public function __construct() {

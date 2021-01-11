@@ -34,7 +34,7 @@ class Schedule {
      * @param           $key
      * @param \stdClass $class
      */
-    public function setTask(\stdClass $class) {
+    public function setTask($class) {
         $this->schedules[] = $class;
     }
 
@@ -64,6 +64,6 @@ class Schedule {
     }
 
     public function getOptions() {
-        return $this->getOptions();
+        return $this->options;
     }
 }

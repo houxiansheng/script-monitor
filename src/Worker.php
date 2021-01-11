@@ -2,7 +2,7 @@
 
 namespace WolfansSm;
 
-use \WolfansSm\Library\Command\Table;
+use \WolfansSm\Library\Share\Table;
 use \WolfansSm\Library\Schedule\Register;
 use \WolfansSm\Library\Schedule\Task;
 

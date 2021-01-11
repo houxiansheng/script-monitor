@@ -1,7 +1,5 @@
 <?php
-namespace WolfansSm\Library\Command;
-
-use WolfansSm\Library\Schedule\Schedule;
+namespace WolfansSm\Library\Share;
 
 class Table {
     protected static $shareSchedule;
@@ -11,10 +9,10 @@ class Table {
         self::$shareSchedule = new Swoole\Table(1024);
         self::$shareSchedule->column('min_pnum', \Swoole\Table::TYPE_INT, 4);
         self::$shareSchedule->column('max_pnum', \Swoole\Table::TYPE_INT, 4);
-        //        self::$shareSchedule->column('min_exectime', \Swoole\Table::TYPE_INT, 4);
-        //        self::$shareSchedule->column('interval_time', \Swoole\Table::TYPE_INT, 4);
-        //        self::$shareSchedule->column('loopnum', \Swoole\Table::TYPE_INT, 4);
-        //        self::$shareSchedule->column('loopsleepms', \Swoole\Table::TYPE_INT, 4);
+        self::$shareSchedule->column('min_exectime', \Swoole\Table::TYPE_INT, 4);
+        self::$shareSchedule->column('interval_time', \Swoole\Table::TYPE_INT, 4);
+        self::$shareSchedule->column('loopnum', \Swoole\Table::TYPE_INT, 4);
+        self::$shareSchedule->column('loopsleepms', \Swoole\Table::TYPE_INT, 4);
         self::$shareSchedule->column('current_exec_num', \Swoole\Table::TYPE_INT, 4);
         self::$shareSchedule->create();
 
@@ -22,6 +20,10 @@ class Table {
         self::$shareCount->column('route_id', \Swoole\Table::TYPE_STRING, 256);
         self::$shareCount->column('stime', \Swoole\Table::TYPE_INT, 4);
         self::$shareCount->create();
+    }
+
+    public function getShareSchedule() {
+        return self::$shareSchedule;
     }
 
     /**
