@@ -2,10 +2,12 @@
 /**
  * 注册要启动的任务
  */
-namespace Wolfans\Schedule;
+namespace Wolfans\Sm\Schedule;
+
+use Wolfans\Sm\Command\Table;
 
 class Register {
-    protected  $command = [];
+    protected $command = [];
 
     public static function setCommand(Command $command) {
         $taskId = $command->getTaskId();
@@ -27,7 +29,7 @@ class Register {
                     $schedule->setTask($class);
                 }
             }
-            self::$command[$taskId][] = $schedule;
+            self::$command[$taskId][$routeId] = $schedule;
         }
     }
 
@@ -47,5 +49,28 @@ class Register {
 
         }
         return self::$command[$taskId];
+    }
+
+    /**
+     * 获取子任务
+     *
+     * @param $taskId
+     * @param $routeId
+     *
+     * @return array|mixed
+     */
+    public static function getSchedules($taskId, $routeId) {
+        if (isset(self::$command[$taskId][$routeId])) {
+            return self::$command[$taskId][$routeId];
+        } else {
+            return [];
+        }
+    }
+
+    public static function setCommandShareTable($taskId) {
+        $commandList = self::getCommand($taskId);
+        foreach ($commandList as $routeId => $options) {
+            Table::addSchedule($routeId, $options);
+        }
     }
 }

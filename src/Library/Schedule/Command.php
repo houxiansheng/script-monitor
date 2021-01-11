@@ -2,7 +2,7 @@
 /**
  * 命令基础类
  */
-namespace Wolfans\Schedule;
+namespace Wolfans\Sm\Schedule;
 
 abstract class Command {
 

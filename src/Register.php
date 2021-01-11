@@ -2,9 +2,9 @@
 /**
  * 注册要启动的任务
  */
-namespace Wolfans;
+namespace Wolfans\Sm;
 
-use \Wolfans\Schedule\Register as ScheduleRegister;
+use \Wolfans\Sm\Schedule\Register as ScheduleRegister;
 
 class Register extends ScheduleRegister {
 }

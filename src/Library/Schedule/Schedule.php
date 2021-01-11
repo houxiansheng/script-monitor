@@ -2,7 +2,7 @@
 /**
  * 任务类型
  */
-namespace Wolfans\Schedule;
+namespace Wolfans\Sm\Schedule;
 
 class Schedule {
     protected $taskId    = null;
@@ -34,7 +34,7 @@ class Schedule {
      * @param           $key
      * @param \stdClass $class
      */
-    public function setTask( \stdClass $class) {
+    public function setTask(\stdClass $class) {
         $this->schedules[] = $class;
     }
 
@@ -61,5 +61,9 @@ class Schedule {
      */
     public function getTaskList() {
         return $this->schedules;
+    }
+
+    public function getOptions() {
+        return $this->getOptions();
     }
 }

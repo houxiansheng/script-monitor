@@ -1,5 +1,5 @@
 <?php
-namespace Wolfans\Schedule;
+namespace Wolfans\Sm\Schedule;
 
 class Task {
     protected $class        = [];
@@ -19,8 +19,8 @@ class Task {
     /**
      * run
      */
-    public function run() {
-        foreach ($this->scheduleList as $schedule) {
+    public function run($schedule) {
+        foreach ($schedule as $schedule) {
             $schedule->setChildProc();
             $schedule->run();
         }

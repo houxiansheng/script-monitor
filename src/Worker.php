@@ -2,22 +2,26 @@
 
 namespace Wolfans;
 
-$startTime   = microtime(true);
-$argvArr     = getopt('', ['routeid:', 'loopnum::', 'loopsleepms::']);
-$cycleMaxNum = isset($argvArr['loopnum']) && is_numeric($argvArr['loopnum']) ? $argvArr['loopnum'] : 1;
-$loopSleepms = isset($argvArr['loopsleepms']) && is_numeric($argvArr['loopsleepms']) ? $argvArr['loopsleepms'] : 100;
-$routeId     = isset($argvArr['routeid']) ? $argvArr['routeid'] : '';
-$schedule    = new Schedule();
-$registerRes = $schedule->register($routeId);
-if (!$registerRes) {
-    Log::info('无事件处理:' . json_encode($argvArr));
-    exit();
-}
-while ($cycleMaxNum > 0) {
-    //捕获信号
-    $schedule->run();
-    usleep($loopSleepms * 1000);
-    $cycleMaxNum--;
-}
+use \Wolfans\Sm\Command\Table;
+use \Wolfans\Sm\Schedule\Register;
+use \Wolfans\Sm\Schedule\Task;
 
-$endTime = microtime(true);
+$argvArr = getopt('', ['taskid:', 'routeid:', 'loopnum::', 'loopsleepms::']);
+$routeId = isset($argvArr['routeid']) ? $argvArr['routeid'] : '';
+$taskId  = isset($argvArr['taskid']) ? $argvArr['taskid'] : '';
+
+$schedule = Register::getSchedules($taskId, $routeId);
+//$schedule    = new Schedule();
+$options     = $schedule->getOptions();
+$cycleMaxNum = isset($options['loopnum']) && is_numeric($options['loopnum']) ? $options['loopnum'] : 1;
+$execCount   = 0;
+$Task        = new Task();
+while ($cycleMaxNum - $execCount > 0) {
+    $Task->run($schedule->getTaskList());
+    //获取共享空间配置
+    $options     = Table::getSchedule($routeId);
+    $cycleMaxNum = isset($options['loopnum']) && is_numeric($options['loopnum']) ? $options['loopnum'] : 1;
+    $loopSleepms = isset($options['loopsleepms']) && is_numeric($options['loopsleepms']) ? $options['loopsleepms'] : 100;
+    //捕获信号
+    usleep($loopSleepms * 1000);
+}
