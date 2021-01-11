@@ -1,8 +1,8 @@
 <?php
-namespace Wolfans;
+namespace WolfansSm;
 
-use Wolfans\Sm\Command\Fork;
-use \Wolfans\Sm\Schedule\Register as RegisterSchedule;
+use WolfansSm\Command\Fork;
+use \WolfansSm\Library\Schedule\Register as RegisterSchedule;
 
 class Master {
     public function __construct($phpRoot) {

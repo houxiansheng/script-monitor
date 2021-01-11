@@ -1,7 +1,7 @@
 <?php
-namespace Wolfans\Sm\Command;
+namespace WolfansSm\Library\Command;
 
-use Wolfans\Sm\Schedule\Schedule;
+use WolfansSm\Library\Schedule\Schedule;
 
 class Table {
     protected static $shareSchedule;

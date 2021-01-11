@@ -1,10 +1,10 @@
 <?php
 
-namespace Wolfans;
+namespace WolfansSm;
 
-use \Wolfans\Sm\Command\Table;
-use \Wolfans\Sm\Schedule\Register;
-use \Wolfans\Sm\Schedule\Task;
+use \WolfansSm\Library\Command\Table;
+use \WolfansSm\Library\Schedule\Register;
+use \WolfansSm\Library\Schedule\Task;
 
 $argvArr = getopt('', ['taskid:', 'routeid:', 'loopnum::', 'loopsleepms::']);
 $routeId = isset($argvArr['routeid']) ? $argvArr['routeid'] : '';

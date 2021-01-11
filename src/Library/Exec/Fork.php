@@ -1,5 +1,5 @@
 <?php
-namespace Wolfans\Sm\Command;
+namespace WolfansSm\Library\Command;
 
 class Fork {
 

@@ -2,7 +2,7 @@
 /**
  * 任务类型
  */
-namespace Wolfans\Sm\Schedule;
+namespace WolfansSm\Library\Schedule;
 
 class Schedule {
     protected $taskId    = null;

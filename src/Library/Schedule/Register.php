@@ -2,9 +2,9 @@
 /**
  * 注册要启动的任务
  */
-namespace Wolfans\Sm\Schedule;
+namespace WolfansSm\Library\Schedule;
 
-use Wolfans\Sm\Command\Table;
+use WolfansSm\Library\Command\Table;
 
 class Register {
     protected $command = [];
