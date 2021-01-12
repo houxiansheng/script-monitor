@@ -1,5 +1,5 @@
 <?php
-namespace WolfansSm\Library\Command;
+namespace WolfansSm\Library\Share;
 
 use WolfansSm\Library\Schedule\Schedule;
 

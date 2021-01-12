@@ -68,8 +68,9 @@ class Register {
 
     public static function setCommandShareTable($taskId) {
         $commandList = self::getCommand($taskId);
-        foreach ($commandList as $routeId => $options) {
-            Table::addSchedule($routeId, $options);
+        Table::init();
+        foreach ($commandList as $routeId => $schedule) {
+            Table::addSchedule($routeId, $schedule->getOptions());
         }
     }
 }

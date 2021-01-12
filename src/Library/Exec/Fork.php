@@ -2,6 +2,7 @@
 namespace WolfansSm\Library\Command;
 
 use WolfansSm\Library\Share\Table;
+use WolfansSm\Library\Share\Route;
 
 class Fork {
 
@@ -34,11 +35,15 @@ class Fork {
     }
 
     protected function wait() {
-        \Swoole\Process::signal(SIGCHLD, function ($sig) {
-            while ($ret = \Swoole\Process::wait(false)) {
-                $pid = $ret['pid'];
-                Table::subByPid($pid);
-            }
-        });
+        while ($ret = \Swoole\Process::wait(false)) {
+            $pid = $ret['pid'];
+            Table::subByPid($pid);
+        }
+        //        \Swoole\Process::signal(SIGCHLD, function ($sig) {
+        //            while ($ret = \Swoole\Process::wait(false)) {
+        //                $pid = $ret['pid'];
+        //                Table::subByPid($pid);
+        //            }
+        //        });
     }
 }
