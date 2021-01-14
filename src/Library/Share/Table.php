@@ -8,14 +8,18 @@ class Table {
     public static function init() {
         self::$shareSchedule = new \Swoole\Table(1024);
         self::$shareSchedule->column('min_pnum', \Swoole\Table::TYPE_INT, 4);
+        self::$shareSchedule->column('min_pnum', \Swoole\Table::TYPE_INT, 4);
         self::$shareSchedule->column('max_pnum', \Swoole\Table::TYPE_INT, 4);
         self::$shareSchedule->column('min_exectime', \Swoole\Table::TYPE_INT, 4);
         self::$shareSchedule->column('interval_time', \Swoole\Table::TYPE_INT, 4);
         self::$shareSchedule->column('loopnum', \Swoole\Table::TYPE_INT, 4);
         self::$shareSchedule->column('loopsleepms', \Swoole\Table::TYPE_INT, 4);
         self::$shareSchedule->column('current_exec_num', \Swoole\Table::TYPE_INT, 4);
+        self::$shareSchedule->column('route_id', \Swoole\Table::TYPE_STRING, 256);
+        self::$shareSchedule->column('task_id', \Swoole\Table::TYPE_STRING, 128);
+        self::$shareSchedule->column('history_exec_num', \Swoole\Table::TYPE_INT, 4);
+        self::$shareSchedule->column('all_exec_time', \Swoole\Table::TYPE_INT, 4);
         self::$shareSchedule->create();
-
         self::$shareCount = new \Swoole\Table(1024);
         self::$shareCount->column('route_id', \Swoole\Table::TYPE_STRING, 256);
         self::$shareCount->column('stime', \Swoole\Table::TYPE_INT, 4);
@@ -24,6 +28,10 @@ class Table {
 
     public static function getShareSchedule() {
         return self::$shareSchedule;
+    }
+
+    public static function getShareCount() {
+        return self::$shareCount;
     }
 
     /**
@@ -39,9 +47,12 @@ class Table {
         return self::$shareSchedule;
     }
 
-    public static function addSchedule($routeId, array $options) {
+    public static function addSchedule($taskId, $routeId, array $options) {
         $options['route_id']         = $routeId;
+        $options['task_id']          = $taskId;
         $options['current_exec_num'] = 0;
+        $options['history_exec_num'] = 0;
+        $options['all_exec_time']    = 0;
         self::$shareSchedule->set((string)$routeId, $options);
     }
 
@@ -54,6 +65,7 @@ class Table {
         }
         if (self::$shareSchedule->exist((string)$routeId)) {
             self::$shareSchedule->incr((string)$routeId, 'current_exec_num', 1);
+            self::$shareSchedule->incr((string)$routeId, 'history_exec_num', 1);
         }
     }
 
@@ -62,9 +74,11 @@ class Table {
      */
     public static function subByPid($pid) {
         if (self::$shareCount->exist((string)$pid)) {
-            $val     = self::$shareCount->get((string)$pid);
-            $routeId = $val['route_id'];
-            self::subCountByRouteId($routeId);
+            $val      = self::$shareCount->get((string)$pid);
+            $routeId  = $val['route_id'];
+            $execTime = self::execTime($val['stime']);
+            self::$shareCount->del((string)$pid);
+            self::subCountByRouteId($routeId, $execTime);
         }
     }
 
@@ -105,9 +119,14 @@ class Table {
      *
      * @param $routeId
      */
-    public static function subCountByRouteId($routeId) {
+    public static function subCountByRouteId($routeId, $execTime) {
         if (self::$shareSchedule->exist((string)$routeId)) {
             self::$shareSchedule->decr((string)$routeId, 'current_exec_num', 1);
+            self::$shareSchedule->incr((string)$routeId, 'all_exec_time', $execTime);
         }
+    }
+
+    protected static function execTime($startTime) {
+        return time() - $startTime;
     }
 }

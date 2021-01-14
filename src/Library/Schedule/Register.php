@@ -70,7 +70,7 @@ class Register {
         $commandList = self::getCommand($taskId);
         Table::init();
         foreach ($commandList as $routeId => $schedule) {
-            Table::addSchedule($routeId, $schedule->getOptions());
+            Table::addSchedule($taskId, $routeId, $schedule->getOptions());
         }
     }
 }

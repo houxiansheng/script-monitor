@@ -34,10 +34,11 @@ class Route {
      * @param          $routeId
      * @param Schedule $schedule
      */
-    public static function getParamStr($routeId, $options) {
+    public static function getParamStr($taskId, $routeId, $options) {
         $loopNum     = isset($options['loopnum']) && is_numeric($options['loopnum']) ? $options['loopnum'] : 60;
         $loopSleepMs = isset($options['loopsleepms']) && is_numeric($options['loopsleepms']) ? $options['loopsleepms'] : 100;
-        $params[]    = '--routeid=' . $routeId;
+        $params[]    = '--taskid=' . $taskId;
+        $params[]    = '--routeid=' . self::encodeRouteId($routeId);
         $params[]    = '--loopnum=' . $loopNum;
         $params[]    = '--loopsleepms=' . $loopSleepMs;
         $params[]    = '> /dev/null & ';
