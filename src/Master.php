@@ -1,7 +1,7 @@
 <?php
 namespace WolfansSm;
 
-use WolfansSm\Library\Command\Fork;
+use WolfansSm\Library\Exec\Fork;
 use \WolfansSm\Library\Schedule\Register as RegisterSchedule;
 
 class Master {
