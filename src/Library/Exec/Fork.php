@@ -23,6 +23,9 @@ class Fork {
         });
     }
 
+    /**
+     * 子进程
+     */
     protected function fork() {
         foreach (Table::getShareSchedule() as $options) {
             $taskId  = isset($options['task_id']) ? $options['task_id'] : '';
@@ -31,11 +34,16 @@ class Fork {
                 continue;
             }
             $params = Route::getParamStr($taskId, $routeId, $options);
-            array_unshift($params, WOLFANS_DIR_RUNPHP);
             //生成进程
             for (; Table::getCountByRouteId($routeId) < Table::getMaxCountByRouteId($routeId);) {
-                $process = new \Swoole\Process(function (\Swoole\Process $childProcess) use ($routeId, $params) {
-                    $childProcess->exec(WOLFANS_PHP_ROOT, $params); // exec 系统调用
+                $process = new \Swoole\Process(function (\Swoole\Process $childProcess) use ($taskId, $routeId, $params) {
+                    if (defined('WOLFANS_PHP_ROOT')) {
+                        array_unshift($params, WOLFANS_DIR_RUNPHP);
+                        $childProcess->exec(WOLFANS_PHP_ROOT, $params); // exec 系统调用
+                    } else {
+                        $childProcess->name('workrun-'.$routeId);
+                        (new Task())->run($taskId, $routeId);
+                    }
                 });
                 $process->start();
                 Table::addCountByPid($process->pid, $routeId);
@@ -43,6 +51,9 @@ class Fork {
         }
     }
 
+    /**
+     * 闹钟：定期fork
+     */
     protected function waitSIGAlarm() {
         \Swoole\Process::signal(SIGALRM, function () {
             $this->fork();

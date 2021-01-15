@@ -7,7 +7,7 @@ use WolfansSm\Library\Schedule\Schedule;
 use WolfansSm\Library\Share\Route;
 use \WolfansSm\Library\Share\Table;
 use \WolfansSm\Library\Schedule\Register;
-use \WolfansSm\Library\Schedule\Task;
+use \WolfansSm\Library\Exec\Task;
 
 class  Worker {
     protected $taskId;
@@ -31,22 +31,21 @@ class  Worker {
     }
 
     function run() {
-        $schedule = Register::getSchedules($this->taskId, $this->routeId);
-        if (!($schedule instanceof Schedule)) {
-            return '';
-        }
-        $options     = $schedule->getOptions();
-        $cycleMaxNum = isset($options['loopnum']) && is_numeric($options['loopnum']) ? $options['loopnum'] : 1;
-        $loopSleepms = isset($options['loopsleepms']) && is_numeric($options['loopsleepms']) ? $options['loopsleepms'] : 100;
-        var_dump($schedule->getTaskList());
-        exit();
-        $execCount = 0;
-        $Task      = new Task();
-        while ($cycleMaxNum - $execCount > 0) {
-            $Task->run($schedule->getTaskList());
-            //捕获信号
-            usleep($loopSleepms * 1000);
-        }
+        (new Task())->run($this->taskId, $this->routeId);
+        //        $schedule = Register::getSchedules($this->taskId, $this->routeId);
+        //        if (!($schedule instanceof Schedule)) {
+        //            return '';
+        //        }
+        //        $options     = $schedule->getOptions();
+        //        $cycleMaxNum = isset($options['loopnum']) && is_numeric($options['loopnum']) ? $options['loopnum'] : 1;
+        //        $loopSleepms = isset($options['loopsleepms']) && is_numeric($options['loopsleepms']) ? $options['loopsleepms'] : 100;
+        //        $task        = new Task();
+        //        $task->setTask($schedule->getTaskList());
+        //        while ($cycleMaxNum-- > 0) {
+        //            $task->run();
+        //            //捕获信号
+        //            usleep($loopSleepms * 1000);
+        //        }
     }
 }
 

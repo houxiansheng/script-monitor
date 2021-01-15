@@ -8,11 +8,13 @@ use \WolfansSm\Library\Schedule\Register as RegisterSchedule;
 class Master {
     protected $taskId;
 
-    public function __construct($phpRoot, $workFile) {
-        define('WOLFANS_PHP_ROOT', $phpRoot);
-        define('WOLFANS_DIR_RUNPHP', $workFile);
+    public function __construct() {
         $argvArr      = getopt('', ['taskid:']);
         $this->taskId = isset($argvArr['taskid']) ? $argvArr['taskid'] : '';
+        if (!$this->taskId) {
+            var_dump('缺少taskid');
+            exit();
+        }
     }
 
     /**
@@ -24,6 +26,11 @@ class Master {
         if ($command->getTaskId() == $this->taskId) {
             Register::setCommand($command);
         }
+    }
+
+    public function setExecFile($phpRoot, $workFile) {
+        define('WOLFANS_PHP_ROOT', $phpRoot);
+        define('WOLFANS_DIR_RUNPHP', $workFile);
     }
 
     /**
