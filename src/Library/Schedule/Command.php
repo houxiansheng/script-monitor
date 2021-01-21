@@ -7,6 +7,7 @@ namespace WolfansSm\Library\Schedule;
 abstract class Command {
 
     protected $taskId       = null;
+    protected $httpPort     = null;
     protected $routeList    = [];
     protected $scheduleList = [];
 
@@ -15,6 +16,10 @@ abstract class Command {
 
     public function getTaskId() {
         return $this->taskId;
+    }
+
+    public function getHttpPort() {
+        return $this->httpPort;
     }
 
     public function getRouteList() {

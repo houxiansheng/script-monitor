@@ -7,6 +7,14 @@ namespace WolfansSm\Library\Http\App;
 use WolfansSm\Library\Share\Table;
 
 class Route {
+    protected $allHttpPosts;
+    protected $ipList;
+
+    public function __construct($allPort, $ipList) {
+        $this->allHttpPosts = $allPort;
+        $this->ipList       = $ipList;
+    }
+
     public function index($route, $request) {
         if ($route == '/json') {
             return $this->json();
@@ -24,12 +32,13 @@ class Route {
     }
 
     public function table() {
-        $ipList = ['10.75.32.235:9501'];
-        $task   = [];
-        foreach ($ipList as $ip) {
-            $json = file_get_contents('http://' . $ip . '/json');
-            $arr  = @json_decode($json, true);
-            is_array($arr) && $task[$ip] = $arr;
+        $task = [];
+        foreach ($this->ipList as $ip) {
+            foreach ($this->allHttpPosts as $port) {
+                $json = file_get_contents('http://' . $ip . ':' . $port . '/json');
+                $arr  = @json_decode($json, true);
+                is_array($arr) && $task[$ip] = $arr;
+            }
         }
 
         $html = '

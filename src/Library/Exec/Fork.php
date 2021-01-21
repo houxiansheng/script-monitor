@@ -6,7 +6,17 @@ use WolfansSm\Library\Share\Table;
 use WolfansSm\Library\Share\Route;
 
 class Fork {
+    protected $httpPort    = null;
+    protected $allHttpPort = [];
+    protected $ipList      = [];
+
     public function __construct() {
+    }
+
+    public function setHttpPort($port, $allPort, $ipList) {
+        $this->httpPort    = $port;
+        $this->allHttpPort = $allPort;
+        $this->ipList      = $ipList;
     }
 
     public function run() {
@@ -41,7 +51,7 @@ class Fork {
                         array_unshift($params, WOLFANS_DIR_RUNPHP);
                         $childProcess->exec(WOLFANS_PHP_ROOT, $params); // exec 系统调用
                     } else {
-                        $childProcess->name('workrun-'.$routeId);
+                        $childProcess->name('workrun-' . $routeId);
                         (new Task())->run($taskId, $routeId);
                     }
                 });
@@ -71,10 +81,15 @@ class Fork {
         });
     }
 
+    /**
+     * http
+     */
     protected function http() {
-        $process = new \Swoole\Process(function (\Swoole\Process $childProcess) {
-            (new Server())->run();
-        });
-        $process->start();
+        if (is_numeric($this->httpPort) && $this->httpPort > 0) {
+            $process = new \Swoole\Process(function (\Swoole\Process $childProcess) {
+                (new Server())->run($this->httpPort, $this->allHttpPort, $this->ipList);
+            });
+            $process->start();
+        }
     }
 }

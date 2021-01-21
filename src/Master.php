@@ -7,6 +7,9 @@ use \WolfansSm\Library\Schedule\Register as RegisterSchedule;
 
 class Master {
     protected $taskId;
+    protected $httpPort    = null;
+    protected $allHttpPort = [];
+    protected $ipList      = [];
 
     public function __construct() {
         $argvArr      = getopt('', ['taskid:']);
@@ -24,8 +27,17 @@ class Master {
      */
     public function setCommand(Command $command) {
         if ($command->getTaskId() == $this->taskId) {
-            Register::setCommand($command);
+            $this->httpPort = $command->getHttpPort();
+            RegisterSchedule::setCommand($command);
         }
+        //聚合所有端口
+        if (is_numeric($command->getHttpPort()) && $command->getHttpPort() > 0) {
+            $this->allHttpPort[] = $command->getHttpPort();
+        }
+    }
+
+    public function setIpList(array $list) {
+        $this->ipList = $list;
     }
 
     public function setExecFile($phpRoot, $workFile) {
@@ -38,6 +50,8 @@ class Master {
      */
     public function run() {
         RegisterSchedule::setCommandShareTable($this->taskId);
-        (new Fork())->run();
+        $fork = new Fork();
+        $fork->setHttpPort($this->httpPort, $this->allHttpPort, $this->ipList);
+        $fork->run();
     }
 }

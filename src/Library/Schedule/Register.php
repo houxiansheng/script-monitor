@@ -24,7 +24,6 @@ class Register {
                 $schedule->setOptions($key, $val);
             }
             //配置任务
-            //配置任务
             foreach ($command->getScheduleList($routeId) as $class) {
                 $schedule->setTask($class);
             }
