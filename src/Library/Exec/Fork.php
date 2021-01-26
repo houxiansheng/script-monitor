@@ -2,21 +2,12 @@
 namespace WolfansSm\Library\Exec;
 
 use WolfansSm\Library\Http\Server;
+use WolfansSm\Library\Schedule\Register;
 use WolfansSm\Library\Share\Table;
 use WolfansSm\Library\Share\Route;
 
 class Fork {
-    protected $httpPort    = null;
-    protected $allHttpPort = [];
-    protected $ipList      = [];
-
     public function __construct() {
-    }
-
-    public function setHttpPort($port, $allPort, $ipList) {
-        $this->httpPort    = $port;
-        $this->allHttpPort = $allPort;
-        $this->ipList      = $ipList;
     }
 
     public function run() {
@@ -85,9 +76,12 @@ class Fork {
      * http
      */
     protected function http() {
-        if (is_numeric($this->httpPort) && $this->httpPort > 0) {
-            $process = new \Swoole\Process(function (\Swoole\Process $childProcess) {
-                (new Server())->run($this->httpPort, $this->allHttpPort, $this->ipList);
+        $httpPort = Register::getListenHttpPort();
+        $ipList   = Register::getHttpIpList();
+        $portList = Register::getHttpPortList();
+        if (is_numeric($httpPort) && $httpPort > 0) {
+            $process = new \Swoole\Process(function (\Swoole\Process $childProcess) use ($httpPort, $portList, $ipList) {
+                (new Server())->run($httpPort, $portList, $ipList);
             });
             $process->start();
         }

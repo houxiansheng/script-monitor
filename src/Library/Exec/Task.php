@@ -13,7 +13,6 @@ class Task {
 
     protected $taskList = [];
 
-    //    public function tes
     public function run($taskId, $routeId) {
         $schedule = Register::getSchedules($taskId, $routeId);
         if (!($schedule instanceof Schedule)) {

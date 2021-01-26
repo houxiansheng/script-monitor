@@ -10,14 +10,12 @@ class Master {
     protected $httpPort    = null;
     protected $allHttpPort = [];
     protected $ipList      = [];
+    protected $forkClass   = null;
 
     public function __construct() {
-        $argvArr      = getopt('', ['taskid:']);
-        $this->taskId = isset($argvArr['taskid']) ? $argvArr['taskid'] : '';
-        if (!$this->taskId) {
-            var_dump('缺少taskid');
-            exit();
-        }
+        $argvArr         = getopt('', ['taskid:']);
+        $this->taskId    = isset($argvArr['taskid']) ? $argvArr['taskid'] : 1;
+        $this->forkClass = new Fork();
     }
 
     /**
@@ -27,17 +25,18 @@ class Master {
      */
     public function setCommand(Command $command) {
         if ($command->getTaskId() == $this->taskId) {
-            $this->httpPort = $command->getHttpPort();
             RegisterSchedule::setCommand($command);
+            RegisterSchedule::setCommandShareTable($command->getTaskId());
         }
         //聚合所有端口
         if (is_numeric($command->getHttpPort()) && $command->getHttpPort() > 0) {
-            $this->allHttpPort[] = $command->getHttpPort();
+            RegisterSchedule::setHttpPort($command->getHttpPort());
+            $command->getTaskId() == $this->taskId && RegisterSchedule::setListenHttpPort($command->getHttpPort());
         }
     }
 
     public function setIpList(array $list) {
-        $this->ipList = $list;
+        RegisterSchedule::setHttpIpList($list);
     }
 
     public function setExecFile($phpRoot, $workFile) {
@@ -49,9 +48,6 @@ class Master {
      * 执行任务
      */
     public function run() {
-        RegisterSchedule::setCommandShareTable($this->taskId);
-        $fork = new Fork();
-        $fork->setHttpPort($this->httpPort, $this->allHttpPort, $this->ipList);
-        $fork->run();
+        $this->forkClass->run();
     }
 }
