@@ -42,7 +42,7 @@ class Fork {
                         array_unshift($params, WOLFANS_DIR_RUNPHP);
                         $childProcess->exec(WOLFANS_PHP_ROOT, $params); // exec 系统调用
                     } else {
-                        $childProcess->name('workrun-' . $routeId);
+                        $childProcess->name('wolfans-worker-' . $routeId);
                         (new Task())->run($taskId, $routeId);
                     }
                 });
