@@ -9,6 +9,7 @@ use WolfansSm\Library\Share\Table;
 class Register {
     protected static $command     = [];
     protected static $httpPort    = null;
+    protected static $httpIp      = null;
     protected static $allHttpPort = [];
     protected static $ipList      = [];
 
@@ -79,6 +80,14 @@ class Register {
 
     public static function getListenHttpPort() {
         return self::$httpPort;
+    }
+
+    public static function setListenHttpIp($ip) {
+        self::$httpIp = $ip;
+    }
+
+    public static function getListenHttpIp() {
+        return self::$httpIp;
     }
 
     public static function setHttpIpList($ipList) {

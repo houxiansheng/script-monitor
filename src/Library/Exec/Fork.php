@@ -76,12 +76,13 @@ class Fork {
      * http
      */
     protected function http() {
+        $httpIp   = Register::getListenHttpIp();
         $httpPort = Register::getListenHttpPort();
         $ipList   = Register::getHttpIpList();
         $portList = Register::getHttpPortList();
         if (is_numeric($httpPort) && $httpPort > 0) {
-            $process = new \Swoole\Process(function (\Swoole\Process $childProcess) use ($httpPort, $portList, $ipList) {
-                (new Server())->run($httpPort, $portList, $ipList);
+            $process = new \Swoole\Process(function (\Swoole\Process $childProcess) use ($httpIp, $httpPort, $portList, $ipList) {
+                (new Server())->run($httpIp,$httpPort, $portList, $ipList);
             });
             $process->start();
         }

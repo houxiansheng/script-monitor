@@ -35,7 +35,11 @@ class Master {
         }
     }
 
-    public function setIpList(array $list) {
+    public function setHttpIp($ip) {
+        RegisterSchedule::setListenHttpIp($ip);
+    }
+
+    public function setHttpIpList(array $list) {
         RegisterSchedule::setHttpIpList($list);
     }
 

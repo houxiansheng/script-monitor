@@ -5,12 +5,13 @@
 namespace WolfansSm\Library\Http;
 
 use WolfansSm\Library\Http\App\Route;
+use WolfansSm\Library\Http\Tool\Tool;
 use WolfansSm\Library\Share\Table;
 
 class Server {
-    public function run($port, $allPort, $ipList) {
-        if (is_numeric($port) && $port > 0) {
-            $http = new \Swoole\Http\Server("0.0.0.0", $port);
+    public function run($httpIp, $port, $allPort, $ipList) {
+        if (Tool::isIp($httpIp) && is_numeric($port) && $port > 0) {
+            $http = new \Swoole\Http\Server($httpIp, $port);
             $http->on('request', function ($request, $response) use ($port, $allPort, $ipList) {
                 $route      = isset($request->server['request_uri']) ? $request->server['request_uri'] : '/';
                 $post       = isset($request->post) && is_array($request->post) ? $request->post : [];
@@ -20,5 +21,9 @@ class Server {
             });
             $http->start();
         }
+    }
+
+    protected function getLocalIp() {
+
     }
 }
