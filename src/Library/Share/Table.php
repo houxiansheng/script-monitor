@@ -19,6 +19,9 @@ class Table {
         self::$shareSchedule->column('task_id', \Swoole\Table::TYPE_STRING, 128);
         self::$shareSchedule->column('history_exec_num', \Swoole\Table::TYPE_INT, 4);
         self::$shareSchedule->column('all_exec_time', \Swoole\Table::TYPE_INT, 4);
+        self::$shareSchedule->column('last_exec_time', \Swoole\Table::TYPE_INT, 4);
+        self::$shareSchedule->column('crontab', \Swoole\Table::TYPE_STRING, 128);
+        self::$shareSchedule->column('can_run_sec', \Swoole\Table::TYPE_INT, 8);//是否可执行
         self::$shareSchedule->create();
         self::$shareCount = new \Swoole\Table(1024);
         self::$shareCount->column('route_id', \Swoole\Table::TYPE_STRING, 256);
@@ -53,6 +56,9 @@ class Table {
         $options['current_exec_num'] = 0;
         $options['history_exec_num'] = 0;
         $options['all_exec_time']    = 0;
+        $options['can_run_sec']      = 0;
+        $options['last_exec_time']   = 0;
+        $options['crontab']          = isset($options['crontab']) ? $options['crontab'] : '';
         self::$shareSchedule->set((string)$routeId, $options);
     }
 
@@ -66,6 +72,7 @@ class Table {
         if (self::$shareSchedule->exist((string)$routeId)) {
             self::$shareSchedule->incr((string)$routeId, 'current_exec_num', 1);
             self::$shareSchedule->incr((string)$routeId, 'history_exec_num', 1);
+            self::$shareSchedule->set((string)$routeId, ['last_exec_time' => time()]);
         }
     }
 
@@ -123,6 +130,27 @@ class Table {
         if (self::$shareSchedule->exist((string)$routeId)) {
             self::$shareSchedule->decr((string)$routeId, 'current_exec_num', 1);
             self::$shareSchedule->incr((string)$routeId, 'all_exec_time', $execTime);
+        }
+    }
+
+    /**
+     * 增加任务
+     *
+     * @param $routeId
+     */
+    public static function addRunList($routeId) {
+        if (self::$shareSchedule->exist((string)$routeId)) {
+            $res = self::$shareSchedule->set((string)$routeId, ['can_run_sec' => 1]);
+        }
+    }
+
+    /**减少任务
+     *
+     * @param $routeId
+     */
+    public static function subRunList($routeId) {
+        if (self::$shareSchedule->exist((string)$routeId)) {
+            self::$shareSchedule->set((string)$routeId, ['can_run_sec' => 0]);
         }
     }
 

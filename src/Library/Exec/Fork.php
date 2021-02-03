@@ -1,6 +1,7 @@
 <?php
 namespace WolfansSm\Library\Exec;
 
+use WolfansSm\Library\Core\ParseCrontab;
 use WolfansSm\Library\Http\Server;
 use WolfansSm\Library\Schedule\Register;
 use WolfansSm\Library\Share\Table;
@@ -12,15 +13,15 @@ class Fork {
 
     public function run() {
         //异步wait，同步fork
-        $this->waitSIGCHLD();
-        $this->waitSIGAlarm();
-        $this->http();
-        $this->forkTick();
+        $this->waitSigchild();//回收孩子
+        $this->waitSIGAlarm();//异步fork子进程
+        $this->http();//http子进程
+        $this->crontab();//发起任务
+        $this->forkTick();//添加计时器死循环
     }
 
     protected function forkTick() {
         \Swoole\Timer::tick(5000, function () {
-            $count = Table::getShareCount();
         });
     }
 
@@ -29,9 +30,10 @@ class Fork {
      */
     protected function fork() {
         foreach (Table::getShareSchedule() as $options) {
-            $taskId  = isset($options['task_id']) ? $options['task_id'] : '';
-            $routeId = isset($options['route_id']) ? $options['route_id'] : '';
-            if (!$taskId || !$routeId) {
+            $taskId    = isset($options['task_id']) ? $options['task_id'] : '';
+            $routeId   = isset($options['route_id']) ? $options['route_id'] : '';
+            $canRunSec = isset($options['can_run_sec']) ? $options['can_run_sec'] : 0;
+            if (!$taskId || !$routeId || !$canRunSec) {
                 continue;
             }
             $params = Route::getParamStr($taskId, $routeId, $options);
@@ -49,6 +51,20 @@ class Fork {
                 $process->start();
                 Table::addCountByPid($process->pid, $routeId);
             }
+            Table::subRunList($routeId);
+        }
+    }
+
+    protected function policy() {
+        $now    = time();
+        $second = (int)date('s', $now);
+        foreach (Table::getShareSchedule() as $options) {
+            $routeId = isset($options['route_id']) ? $options['route_id'] : '';
+            $crontab = isset($options['crontab']) ? $options['crontab'] : '';
+            $secList = ParseCrontab::parse($crontab);
+            if ($secList && is_array($secList) && isset($secList[$second])) {
+                Table::addRunList($routeId, $now);
+            }
         }
     }
 
@@ -63,7 +79,13 @@ class Fork {
         \Swoole\Process::alarm(2000 * 1000);
     }
 
-    protected function waitSIGCHLD() {
+    protected function crontab() {
+        \Swoole\Timer::tick(1000, function () {
+            $this->policy();
+        });
+    }
+
+    protected function waitSigchild() {
         \Swoole\Process::signal(SIGCHLD, function ($sig) {
             while ($ret = \Swoole\Process::wait(false)) {
                 $pid = $ret['pid'];
@@ -82,7 +104,7 @@ class Fork {
         $portList = Register::getHttpPortList();
         if (is_numeric($httpPort) && $httpPort > 0) {
             $process = new \Swoole\Process(function (\Swoole\Process $childProcess) use ($httpIp, $httpPort, $portList, $ipList) {
-                (new Server())->run($httpIp,$httpPort, $portList, $ipList);
+                (new Server())->run($httpIp, $httpPort, $portList, $ipList);
             });
             $process->start();
         }

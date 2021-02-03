@@ -35,7 +35,7 @@ class Route {
         $task = [];
         foreach ($this->ipList as $ip) {
             foreach ($this->allHttpPosts as $port) {
-                $json = file_get_contents('http://' . $ip . ':' . $port . '/json');
+                $json = @file_get_contents('http://' . $ip . ':' . $port . '/json');
                 $arr  = @json_decode($json, true);
                 is_array($arr) && $task[$ip . ':' . $port] = $arr;
             }
@@ -67,19 +67,21 @@ class Route {
             }
             </style>';
         $html .= '<table class="gridtable">';
-        $html .= '<tr> <th>节点</th><th>任务</th> <th>最大</th><th>最小</th><th>loop</th><th>sleep</th> <th>历史启动</th><th>总/平时时间</th><th>运行量</th> </tr>';
+        $html .= '<tr> <th>节点</th><th>任务</th><th>计划时间</th> <th>最大</th><th>最小</th><th>loop</th><th>sleep</th> <th>历史启动</th><th>总/平均时间</th><th>最近运行时间</th><th>运行量</th> </tr>';
         foreach ($task as $ip => $schedule) {
-            foreach (Table::getShareSchedule() as $options) {
+            foreach ($schedule as $options) {
                 $aa   = $options['history_exec_num'] ? $options['history_exec_num'] : 1;
                 $html .= '<tr> <td>' .
                     $ip . '</td> <td>' .
                     $options['route_id'] . '</td> <td>' .
+                    $options['crontab'] . '</td> <td>' .
                     $options['max_pnum'] . '</td><td>' .
                     $options['min_pnum'] . '</td><td>' .
                     $options['loopnum'] . '</td><td>' .
                     $options['loopsleepms'] . '</td><td>' .
                     $options['history_exec_num'] . '</td><td>' .
                     $options['all_exec_time'] . '/' . intval($options['all_exec_time'] / $aa) . '</td><td>' .
+                    date('Y-m-d H:i:s', $options['last_exec_time']) . '</td><td>' .
                     $options['current_exec_num'] . '</td></tr>';
             }
         }
