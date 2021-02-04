@@ -32,7 +32,7 @@ class Task {
     protected function setTask(array $schedules) {
         //异步wait，同步fork
         foreach ($schedules as $schedule) {
-            $taskList[] = new $schedule();
+            $this->taskList[] = new $schedule();
         }
     }
 
