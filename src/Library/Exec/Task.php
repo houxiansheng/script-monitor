@@ -38,6 +38,9 @@ class Task {
 
     protected function exec() {
         foreach ($this->taskList as $task) {
+            if(method_exists($task,'setChildProc')){
+                $task->setChildProc();
+            }
             $task->run();
         }
     }
