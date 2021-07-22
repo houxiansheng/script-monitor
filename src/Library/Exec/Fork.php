@@ -45,7 +45,8 @@ class Fork {
                     $ipList   = Register::getHttpIpList();
                     $portList = Register::getHttpPortList();
                     if (is_numeric($httpPort) && $httpPort > 0) {
-                        $process = new \Swoole\Process(function (\Swoole\Process $childProcess) use ($httpIp, $httpPort, $portList, $ipList) {
+                        $process = new \Swoole\Process(function (\Swoole\Process $childProcess) use ($taskId, $routeId, $params, $httpIp, $httpPort, $portList, $ipList) {
+                            $childProcess->name('wolfans-worker-' . $routeId);
                             (new Server())->run($httpIp, $httpPort, $portList, $ipList);
                         });
                         $process->start();
