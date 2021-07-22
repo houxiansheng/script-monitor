@@ -114,15 +114,5 @@ class Fork {
      */
     protected function http() {
         Table::addSchedule(1, 'wolfans_https_server', ['min_pnum' => 1, 'max_pnum' => 1, 'loopnum' => 1, 'loopsleepms' => 10000, 'crontab' => '* * * * * *']);
-        $httpIp   = Register::getListenHttpIp();
-        $httpPort = Register::getListenHttpPort();
-        $ipList   = Register::getHttpIpList();
-        $portList = Register::getHttpPortList();
-        if (is_numeric($httpPort) && $httpPort > 0) {
-            $process = new \Swoole\Process(function (\Swoole\Process $childProcess) use ($httpIp, $httpPort, $portList, $ipList) {
-                (new Server())->run($httpIp, $httpPort, $portList, $ipList);
-            });
-            $process->start();
-        }
     }
 }
