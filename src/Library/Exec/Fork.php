@@ -39,16 +39,31 @@ class Fork {
             $params = Route::getParamStr($taskId, $routeId, $options);
             //生成进程
             for (; Table::getCountByRouteId($routeId) < Table::getMaxCountByRouteId($routeId);) {
-                $process = new \Swoole\Process(function (\Swoole\Process $childProcess) use ($taskId, $routeId, $params) {
-                    if (defined('WOLFANS_PHP_ROOT')) {
-                        array_unshift($params, WOLFANS_DIR_RUNPHP);
-                        $childProcess->exec(WOLFANS_PHP_ROOT, $params); // exec 系统调用
-                    } else {
-                        $childProcess->name('wolfans-worker-' . $routeId);
-                        (new Task())->run($taskId, $routeId);
+                if ($routeId == 'wolfans_https_server') {
+                    $httpIp   = Register::getListenHttpIp();
+                    $httpPort = Register::getListenHttpPort();
+                    $ipList   = Register::getHttpIpList();
+                    $portList = Register::getHttpPortList();
+                    if (is_numeric($httpPort) && $httpPort > 0) {
+                        $process = new \Swoole\Process(function (\Swoole\Process $childProcess) use ($httpIp, $httpPort, $portList, $ipList) {
+                            (new Server())->run($httpIp, $httpPort, $portList, $ipList);
+                        });
+                        $process->start();
+                        Table::addCountByPid($process->pid, $routeId);
                     }
-                });
-                $process->start();
+                } else {
+                    $process = new \Swoole\Process(function (\Swoole\Process $childProcess) use ($taskId, $routeId, $params) {
+                        if (defined('WOLFANS_PHP_ROOT')) {
+                            array_unshift($params, WOLFANS_DIR_RUNPHP);
+                            $childProcess->exec(WOLFANS_PHP_ROOT, $params); // exec 系统调用
+                        } else {
+                            $childProcess->name('wolfans-worker-' . $routeId);
+                            (new Task())->run($taskId, $routeId);
+                        }
+                    });
+                    $process->start();
+                    Table::addCountByPid($process->pid, $routeId);
+                }
                 Table::addCountByPid($process->pid, $routeId);
             }
             Table::subRunList($routeId);
@@ -98,6 +113,7 @@ class Fork {
      * http
      */
     protected function http() {
+        Table::addSchedule(1, 'wolfans_https_server', ['min_pnum' => 1, 'max_pnum' => 1, 'loopnum' => 1, 'loopsleepms' => 10000, 'crontab' => '* * * * * *']);
         $httpIp   = Register::getListenHttpIp();
         $httpPort = Register::getListenHttpPort();
         $ipList   = Register::getHttpIpList();
