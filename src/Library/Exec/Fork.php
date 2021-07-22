@@ -64,7 +64,6 @@ class Fork {
                     $process->start();
                     Table::addCountByPid($process->pid, $routeId);
                 }
-                Table::addCountByPid($process->pid, $routeId);
             }
             Table::subRunList($routeId);
         }
@@ -113,6 +112,6 @@ class Fork {
      * http
      */
     protected function http() {
-        Table::addSchedule(1, 'wolfans_https_server', ['min_pnum' => 1, 'max_pnum' => 1, 'loopnum' => 1, 'loopsleepms' => 10000, 'crontab' => '* * * * * *']);
+        Table::addSchedule('9999999', 'wolfans_https_server', ['min_pnum' => 1, 'max_pnum' => 1, 'loopnum' => 1, 'loopsleepms' => 10000, 'crontab' => '*/10 * * * * *']);
     }
 }
