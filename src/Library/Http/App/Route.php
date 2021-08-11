@@ -4,6 +4,7 @@
  */
 namespace WolfansSm\Library\Http\App;
 
+use WolfansSm\Library\Http\Tool\Tool;
 use WolfansSm\Library\Share\Table;
 
 class Route {
@@ -24,9 +25,12 @@ class Route {
     }
 
     public function json() {
-        $data = [];
+        $data        = [];
+        $pStatusList = Tool::stats();//补充实时cpu 虚拟内存，实内存
         foreach (Table::getShareSchedule() as $options) {
-            $data[] = $options;
+            $routeId = $options['route_id'];
+            $options = isset($pStatusList[$routeId]) ? array_merge($pStatusList[$routeId], $options) : $options;
+            $data[]  = $options;
         }
         return json_encode($data);
     }
@@ -67,7 +71,9 @@ class Route {
             }
             </style>';
         $html .= '<table class="gridtable">';
-        $html .= '<tr> <th>节点</th><th>任务</th><th>计划时间</th> <th>最大</th><th>最小</th><th>loop</th><th>sleep</th> <th>历史启动</th><th>总/平均时间</th><th>最近运行时间</th><th>运行量</th> </tr>';
+        $html .= '<tr> <th>节点</th><th>任务</th><th>计划时间</th> <th>最大</th><th>最小</th><th>loop</th><th>sleep</th> 
+                        <th>历史启动</th><th>总/平均时间</th><th>最近运行时间</th><th>运行量</th> <th>最大CPU（实时）</th> <th>最大VSZ（实时）</th> <th>最大RSS（实时）</th> 
+                  </tr>';
         foreach ($task as $ip => $schedule) {
             foreach ($schedule as $options) {
                 $aa   = $options['history_exec_num'] ? $options['history_exec_num'] : 1;
@@ -82,7 +88,10 @@ class Route {
                     $options['history_exec_num'] . '</td><td>' .
                     $options['all_exec_time'] . '/' . intval($options['all_exec_time'] / $aa) . '</td><td>' .
                     date('Y-m-d H:i:s', $options['last_exec_time']) . '</td><td>' .
-                    $options['current_exec_num'] . '</td></tr>';
+                    $options['current_exec_num'] . '</td><td>' .
+                    ($options['cpu'] ?? '') . '</td><td>' .
+                    ($options['vsz'] ?? '') . '</td><td>' .
+                    ($options['rss'] ?? '') . '</td></tr>';
             }
         }
         $html .= '</table>';

@@ -13,7 +13,7 @@ class Task {
 
     protected $taskList = [];
 
-    public function run($taskId, $routeId) {
+    public function run($taskId, $routeId, $runOptions = []) {
         $schedule = Register::getSchedules($taskId, $routeId);
         if (!($schedule instanceof Schedule)) {
             return '';
@@ -23,7 +23,7 @@ class Task {
         $loopSleepms = isset($options['loopsleepms']) && is_numeric($options['loopsleepms']) ? $options['loopsleepms'] : 100;
         $this->setTask($schedule->getTaskList());
         while ($cycleMaxNum-- > 0) {
-            $this->exec();
+            $this->exec($options);
             //捕获信号
             usleep($loopSleepms * 1000);
         }
@@ -36,11 +36,12 @@ class Task {
         }
     }
 
-    protected function exec() {
+    protected function exec($options) {
         foreach ($this->taskList as $task) {
-            if(method_exists($task,'setChildProc')){
+            if (method_exists($task, 'setChildProc')) {
                 $task->setChildProc();
             }
+            $task->runOptions = $options;
             $task->run();
         }
     }

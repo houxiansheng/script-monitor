@@ -43,6 +43,10 @@ class Master {
         RegisterSchedule::setHttpIpList($list);
     }
 
+    public function setLogPath($path) {
+
+    }
+
     public function setExecFile($phpRoot, $workFile) {
         define('WOLFANS_PHP_ROOT', $phpRoot);
         define('WOLFANS_DIR_RUNPHP', $workFile);

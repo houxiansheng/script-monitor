@@ -3,6 +3,7 @@ namespace WolfansSm\Library\Exec;
 
 use WolfansSm\Library\Core\ParseCrontab;
 use WolfansSm\Library\Http\Server;
+use WolfansSm\Library\Log\Log;
 use WolfansSm\Library\Schedule\Register;
 use WolfansSm\Library\Share\Table;
 use WolfansSm\Library\Share\Route;
@@ -13,10 +14,10 @@ class Fork {
 
     public function run() {
         //异步wait，同步fork
-        $this->waitSigchild();//回收孩子
-        $this->waitSIGAlarm();//异步fork子进程
-        $this->http();//http子进程
-        $this->crontab();//发起任务
+        $this->waitSigChild();//回收孩子
+        $this->waitSigAlarm();//异步fork子进程
+        $this->addSubTask();//http子进程
+        (new Crontab())->policy();
         $this->forkTick();//添加计时器死循环
     }
 
@@ -39,7 +40,14 @@ class Fork {
             $params = Route::getParamStr($taskId, $routeId, $options);
             //生成进程
             for (; Table::getCountByRouteId($routeId) < Table::getMaxCountByRouteId($routeId);) {
-                if ($routeId == 'wolfans_https_server') {
+                if ($routeId == 'wolfans_crontab_server') {
+                    $process = new \Swoole\Process(function (\Swoole\Process $childProcess) use ($taskId, $routeId, $params) {
+                        $childProcess->name('wolfans-worker-' . $routeId);
+                        (new Crontab())->run();
+                    });
+                    $process->start();
+                    Table::addCountByPid($process->pid, $routeId);
+                } elseif ($routeId == 'wolfans_https_server') {
                     $httpIp   = Register::getListenHttpIp();
                     $httpPort = Register::getListenHttpPort();
                     $ipList   = Register::getHttpIpList();
@@ -53,40 +61,28 @@ class Fork {
                         Table::addCountByPid($process->pid, $routeId);
                     }
                 } else {
-                    $process = new \Swoole\Process(function (\Swoole\Process $childProcess) use ($taskId, $routeId, $params) {
+                    $process = new \Swoole\Process(function (\Swoole\Process $childProcess) use ($taskId, $routeId, $params, $options) {
                         if (defined('WOLFANS_PHP_ROOT')) {
                             array_unshift($params, WOLFANS_DIR_RUNPHP);
                             $childProcess->exec(WOLFANS_PHP_ROOT, $params); // exec 系统调用
                         } else {
                             $childProcess->name('wolfans-worker-' . $routeId);
-                            (new Task())->run($taskId, $routeId);
+                            (new Task())->run($taskId, $routeId, $options);
                         }
                     });
                     $process->start();
                     Table::addCountByPid($process->pid, $routeId);
                 }
+                $process->pid && Log::info($process->pid . "\t" . $routeId . "\t" . Table::getCountByRouteId($routeId));
             }
             Table::subRunList($routeId);
-        }
-    }
-
-    protected function policy() {
-        $now    = time();
-        $second = (int)date('s', $now);
-        foreach (Table::getShareSchedule() as $options) {
-            $routeId = isset($options['route_id']) ? $options['route_id'] : '';
-            $crontab = isset($options['crontab']) ? $options['crontab'] : '';
-            $secList = ParseCrontab::parse($crontab);
-            if ($secList && is_array($secList) && isset($secList[$second])) {
-                Table::addRunList($routeId, $now);
-            }
         }
     }
 
     /**
      * 闹钟：定期fork
      */
-    protected function waitSIGAlarm() {
+    protected function waitSigAlarm() {
         \Swoole\Process::signal(SIGALRM, function () {
             $this->fork();
         });
@@ -94,17 +90,16 @@ class Fork {
         \Swoole\Process::alarm(2000 * 1000);
     }
 
-    protected function crontab() {
-        \Swoole\Timer::tick(1000, function () {
-            $this->policy();
-        });
-    }
-
-    protected function waitSigchild() {
+    /**
+     * 子进程退出
+     */
+    protected function waitSigChild() {
         \Swoole\Process::signal(SIGCHLD, function ($sig) {
             while ($ret = \Swoole\Process::wait(false)) {
-                $pid = $ret['pid'];
-                Table::subByPid($pid);
+                $pid     = $ret['pid'];
+                $code    = (int)$ret['code'];
+                $routeId = Table::subByPid($pid);
+                $code > 0 && $routeId && Log::error($pid . "\t" . $routeId . "\t" . $code);
             }
         });
     }
@@ -112,7 +107,8 @@ class Fork {
     /**
      * http
      */
-    protected function http() {
+    protected function addSubTask() {
         Table::addSchedule('9999999', 'wolfans_https_server', ['min_pnum' => 1, 'max_pnum' => 1, 'loopnum' => 1, 'loopsleepms' => 10000, 'crontab' => '*/10 * * * * *']);
+        Table::addSchedule('9999998', 'wolfans_crontab_server', ['min_pnum' => 1, 'max_pnum' => 1, 'loopnum' => 1, 'loopsleepms' => 10, 'crontab' => '* * * * * *']);
     }
 }

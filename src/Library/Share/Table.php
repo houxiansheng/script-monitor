@@ -8,8 +8,8 @@ class Table {
     public static function init() {
         self::$shareSchedule = new \Swoole\Table(1024);
         self::$shareSchedule->column('min_pnum', \Swoole\Table::TYPE_INT, 4);
-        self::$shareSchedule->column('min_pnum', \Swoole\Table::TYPE_INT, 4);
         self::$shareSchedule->column('max_pnum', \Swoole\Table::TYPE_INT, 4);
+        self::$shareSchedule->column('robot_pnum', \Swoole\Table::TYPE_INT, 4);
         self::$shareSchedule->column('min_exectime', \Swoole\Table::TYPE_INT, 4);
         self::$shareSchedule->column('interval_time', \Swoole\Table::TYPE_INT, 4);
         self::$shareSchedule->column('loopnum', \Swoole\Table::TYPE_INT, 4);
@@ -51,6 +51,7 @@ class Table {
     }
 
     public static function addSchedule($taskId, $routeId, array $options) {
+        $options['robot_pnum']       = isset($options['min_pnum']) ? $options['min_pnum'] : 1;
         $options['route_id']         = $routeId;
         $options['task_id']          = $taskId;
         $options['current_exec_num'] = 0;
@@ -86,6 +87,9 @@ class Table {
             $execTime = self::execTime($val['stime']);
             self::$shareCount->del((string)$pid);
             self::subCountByRouteId($routeId, $execTime);
+            return $routeId;
+        } else {
+            return null;
         }
     }
 
