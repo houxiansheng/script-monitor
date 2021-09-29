@@ -17,8 +17,18 @@ class Fork {
         $this->waitSigChild();//回收孩子
         $this->waitSigAlarm();//异步fork子进程
         $this->addSubTask();//http子进程
-        (new Crontab())->policy();
+        $this->policy();//主动触发crontab一次
         $this->forkTick();//添加计时器死循环
+    }
+
+    protected function policy() {
+        $crontab = new Crontab();
+        if ($crontab->hasCrontab() == 0) {
+            Log::error("exit \t has no crontab");
+            echo 'has no crontab';
+            exit();
+        }
+        $crontab->policy();
     }
 
     protected function forkTick() {

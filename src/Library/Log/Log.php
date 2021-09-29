@@ -16,6 +16,15 @@ class Log {
         self::write($str, $des);
     }
 
+    /**
+     * @param $msg string
+     */
+    static function crontab($msg) {
+        $str = date('Y-m-d H:i:s') . "\tcrontab\t" . $msg . PHP_EOL;
+        $des = '/data1/apache2/phplogs/wolfans-fork-' . date('YmdH') . '.log';
+        self::write($str, $des);
+    }
+
     static function error($msg) {
         $str = date('Y-m-d H:i:s') . "\terr\t" . $msg . PHP_EOL;
         $des = '/data1/apache2/phplogs/wolfans-fork-' . date('YmdH') . '.log';

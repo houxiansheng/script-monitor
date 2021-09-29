@@ -72,7 +72,8 @@ class Route {
             </style>';
         $html .= '<table class="gridtable">';
         $html .= '<tr> <th>节点</th><th>任务</th><th>计划时间</th> <th>最大</th><th>最小</th><th>loop</th><th>sleep</th> 
-                        <th>历史启动</th><th>总/平均时间</th><th>最近运行时间</th><th>运行量</th> <th>最大CPU（实时）</th> <th>最大VSZ（实时）</th> <th>最大RSS（实时）</th> 
+                        <th>历史启动</th><th>总/平均时间</th><th>最近运行时间</th><th>运行量</th> <th>最大CPU（实时）</th> <th>最大VSZ（实时）</th> <th>最大RSS（实时）
+                        <th>日志总条数/大小（实时）</th> 
                   </tr>';
         foreach ($task as $ip => $schedule) {
             foreach ($schedule as $options) {
@@ -86,12 +87,13 @@ class Route {
                     $options['loopnum'] . '</td><td>' .
                     $options['loopsleepms'] . '</td><td>' .
                     $options['history_exec_num'] . '</td><td>' .
-                    $options['all_exec_time'] . '/' . intval($options['all_exec_time'] / $aa) . '</td><td>' .
+                    Tool::getNum($options['all_exec_time']) . '/' . Tool::getNum(intval($options['all_exec_time'] / $aa)) . '</td><td>' .
                     date('Y-m-d H:i:s', $options['last_exec_time']) . '</td><td>' .
                     $options['current_exec_num'] . '</td><td>' .
                     ($options['cpu'] ?? '') . '</td><td>' .
-                    ($options['vsz'] ?? '') . '</td><td>' .
-                    ($options['rss'] ?? '') . '</td></tr>';
+                    (Tool::getByte($options['vsz']) ?? '') . '</td><td>' .
+                    (Tool::getByte($options['rss']) ?? '') . '</td><td>' .
+                    (Tool::getNum($options['log_num'] + $options['log_tmp_num']) . '/' . Tool::getByte($options['log_len'] + $options['log_tmp_len'])) . '</td></tr>';
             }
         }
         $html .= '</table>';

@@ -60,4 +60,49 @@ class Tool {
         }
         return $data;
     }
+
+    /**
+     * 转换为kb
+     *
+     * @param $num
+     *
+     * @return string
+     */
+    public static function getByte($num) {
+        $num  = intval($num);
+        $unit = ['KB', 'MB', 'GB', 'TB', 'PB'];
+        $ue   = 'B';
+        foreach ($unit as $u) {
+            $num1 = $num >> 10;
+            if ($num1 <= 0) {
+                break;
+            }
+            $num = $num1;
+            $ue  = $u;
+        }
+        return $num > 0 ? ($num . $ue) : '';
+    }
+
+    /**
+     * 转换为十万
+     *
+     * @param $num
+     *
+     * @return string
+     */
+
+    public static function getNum($num) {
+        $num  = intval($num);
+        $unit = ['十', '百', '千', '万', '十万', '百万', '千万', '亿', '十亿', '百亿'];
+        $ue   = '';
+        foreach ($unit as $u) {
+            $num1 = $num / 10;
+            if ($num1 < 1) {
+                break;
+            }
+            $num = $num1;
+            $ue  = $u;
+        }
+        return $num > 0 ? (number_format($num, 2) . '(' . $ue . ')') : '';
+    }
 }
