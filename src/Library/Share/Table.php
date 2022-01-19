@@ -23,6 +23,7 @@ class Table {
         self::$shareSchedule->column('all_exec_time', \Swoole\Table::TYPE_INT, 4);
         self::$shareSchedule->column('last_exec_time', \Swoole\Table::TYPE_INT, 4);
         self::$shareSchedule->column('crontab', \Swoole\Table::TYPE_STRING, 128);
+        self::$shareSchedule->column('custom', \Swoole\Table::TYPE_STRING, 256);
         self::$shareSchedule->column('can_run_sec', \Swoole\Table::TYPE_INT, 8);//是否可执行
         self::$shareSchedule->column('log_num', \Swoole\Table::TYPE_INT, 8);//日志数量
         self::$shareSchedule->column('log_len', \Swoole\Table::TYPE_INT, 8);//日志长度
@@ -66,6 +67,7 @@ class Table {
         $options['log_num']          = 0;
         $options['log_len']          = 0;
         $options['crontab']          = isset($options['crontab']) ? $options['crontab'] : '';
+        $options['custom']           = isset($options['custom']) ? $options['custom'] : '';
         self::$shareSchedule->set((string)$routeId, $options);
         Log::info("addSubTask\t" . $taskId . "\t" . $routeId . "\t" . json_encode($options));
     }
@@ -123,12 +125,16 @@ class Table {
      *
      * @return int
      */
-    public static function getMaxCountByRouteId($routeId) {
-        if (self::$shareSchedule->exist((string)$routeId)) {
-            $routeVal = self::$shareSchedule->get((string)$routeId);
-            return $routeVal['max_pnum'];
+    public static function getMaxCountByRouteId($routeId, $online = false) {
+        if ($online) {
+            if (self::$shareSchedule->exist((string)$routeId)) {
+                $routeVal = self::$shareSchedule->get((string)$routeId);
+                return $routeVal['max_pnum'];
+            } else {
+                return 0;
+            }
         } else {
-            return 0;
+            return 1;
         }
     }
 

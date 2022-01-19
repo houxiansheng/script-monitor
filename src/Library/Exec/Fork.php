@@ -9,7 +9,18 @@ use WolfansSm\Library\Share\Table;
 use WolfansSm\Library\Share\Route;
 
 class Fork {
+    protected $online = false;
+
     public function __construct() {
+    }
+
+    /**
+     * 设置线上环境
+     *
+     * @param $bool
+     */
+    public function setOnline($bool) {
+        $this->online = $bool;
     }
 
     public function run() {
@@ -49,7 +60,9 @@ class Fork {
             }
             $params = Route::getParamStr($taskId, $routeId, $options);
             //生成进程
-            for (; Table::getCountByRouteId($routeId) < Table::getMaxCountByRouteId($routeId);) {
+            $curProcess = Table::getCountByRouteId($routeId);
+            $maxProcess = Table::getMaxCountByRouteId($routeId, $this->online);
+            for (; $curProcess < $maxProcess; $curProcess++) {
                 if ($routeId == 'wolfans_crontab_server') {
                     $process = new \Swoole\Process(function (\Swoole\Process $childProcess) use ($taskId, $routeId, $params) {
                         $childProcess->name('wolfans-worker-' . $routeId);

@@ -35,6 +35,13 @@ class Master {
         }
     }
 
+    /**
+     * 配置环境
+     */
+    public function setOnline($bool) {
+        $this->forkClass->setOnline($bool);
+    }
+
     public function setHttpIp($ip) {
         RegisterSchedule::setListenHttpIp($ip);
     }
